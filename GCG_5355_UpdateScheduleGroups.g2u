@@ -1,0 +1,147 @@
+Program.Sub.ScreenSU.Start
+Gui.F_Update_Schedule..Create
+Gui.F_Update_Schedule..Caption("Update Schedule Group")
+Gui.F_Update_Schedule..Size(7560,2940)
+Gui.F_Update_Schedule..MinX(0)
+Gui.F_Update_Schedule..MinY(0)
+Gui.F_Update_Schedule..Position(0,0)
+Gui.F_Update_Schedule..BackColor(-2147483633)
+Gui.F_Update_Schedule..MousePointer(0)
+Gui.F_Update_Schedule..Event(UnLoad,F_Update_Schedule_UnLoad)
+Gui.F_Update_Schedule.btnUpdate.Create(Button)
+Gui.F_Update_Schedule.btnUpdate.Size(855,375)
+Gui.F_Update_Schedule.btnUpdate.Position(3090,1275)
+Gui.F_Update_Schedule.btnUpdate.Caption("Update")
+Gui.F_Update_Schedule.btnUpdate.Event(Click,btnUpdate_Click)
+Gui.F_Update_Schedule.lbl1.Create(Label,"From Schedule",True,1935,255,0,1455,255,True,0,"Arial",8,-2147483633,0)
+Gui.F_Update_Schedule.lbl2.Create(Label,"To Schedule",True,1935,255,0,4230,255,True,0,"Arial",8,-2147483633,0)
+Gui.F_Update_Schedule.txtFrom.Create(TextBox,"",True,1215,300,0,1440,465,True,0,"Arial",8,-2147483643,1)
+Gui.F_Update_Schedule.txtFrom.MaxLength(9)
+Gui.F_Update_Schedule.txtTo.Create(TextBox,"",True,1215,300,0,4245,465,True,0,"Arial",8,-2147483643,1)
+Gui.F_Update_Schedule.txtTo.MaxLength(9)
+Gui.F_Update_Schedule.btnFromBrowser.Create(Button)
+Gui.F_Update_Schedule.btnFromBrowser.Size(855,375)
+Gui.F_Update_Schedule.btnFromBrowser.Position(2790,450)
+Gui.F_Update_Schedule.btnFromBrowser.Event(Click,btnFromBrowser_Click)
+Gui.F_Update_Schedule.btnFromBrowser.Caption("^")
+Gui.F_Update_Schedule.btnToBrowser.Create(Button)
+Gui.F_Update_Schedule.btnToBrowser.Size(855,375)
+Gui.F_Update_Schedule.btnToBrowser.Position(5550,420)
+Gui.F_Update_Schedule.btnToBrowser.Event(Click,btnToBrowser_Click)
+Gui.F_Update_Schedule.btnToBrowser.Caption("^")
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Author: GaryB
+'Date:   11/15/18
+'Customer: TripleInc.
+'Add custom menu item to update the schedule groups in the job_headers,
+'custom menu item - Shop Floor Control > File > Update scheduling groups
+'GCG_5355_UpdateSchedeGroups.g2u 
+
+'    ******   make sure to declare all variables   *******
+
+F.Intrinsic.Control.Try
+V.Local.sError.Declare(String, "")
+
+'open DB connection
+f.ODBC.Connection!Con.OpenCompanyConnection
+ 
+'show the screen
+gui.F_Update_Schedule..Show
+
+F.Intrinsic.Control.Catch
+    F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+    F.Intrinsic.UI.Msgbox(V.Local.sError)
+    f.Intrinsic.Control.CallSub(F_Update_Schedule_Unload)
+F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.btnUpdate_Click.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare(String, "")
+v.Local.sRet.Declare(String)
+v.Local.sFrom.Declare(String)
+v.Local.sTo.Declare(String)
+
+
+v.Local.sFrom.Set(v.Screen.F_Update_Schedule!txtFrom.Text.Trim)
+v.Local.sTo.Set(v.Screen.F_Update_Schedule!txtTo.Text.Trim)
+f.Intrinsic.String.Build("Update JOB_HEADER SET SCH_GRP = '{1}' WHERE SCH_GRP = '{0}'",v.Local.sFrom,v.Local.sTo,v.Local.sRet)
+f.ODBC.Connection!con.Execute(v.Local.sRet)
+gui.F_Update_Schedule.txtFrom.Text("")
+gui.F_Update_Schedule.txtTo.Text("")
+F.Intrinsic.Control.Catch
+    F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+    F.Intrinsic.UI.Msgbox(V.Local.sError)
+    f.Intrinsic.Control.CallSub(F_Update_Schedule_Unload)
+F.Intrinsic.Control.EndTry
+Program.Sub.btnUpdate_Click.End
+
+Program.Sub.F_Update_Schedule_Unload.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare(String, "")
+
+
+'close the DB connection
+f.ODBC.Connection!Con.Close
+f.Intrinsic.Control.End
+
+F.Intrinsic.Control.Catch
+    F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+    F.Intrinsic.UI.Msgbox(V.Local.sError)   
+F.Intrinsic.Control.EndTry
+Program.Sub.F_Update_Schedule_Unload.End
+
+Program.Sub.btnFromBrowser_Click.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare(String, "")
+
+Variable.Local.sRet.Declare(string)
+Variable.Local.sTemp.Declare(string)
+Variable.Local.sTitles.Declare(string)
+Variable.Local.iWidths.Declare(long)
+V.Local.sTitles.Set("ID")
+v.Local.iWidths.Set("20")
+f.Intrinsic.UI.Browser("From Schedule","con","Select ID from V_SCHED_GROUP",V.Local.sTitles,V.Local.iWidths,V.Local.sRet)
+Function.Intrinsic.Control.If(Variable.Local.sRet,"=","***CANCEL***")
+   Function.Intrinsic.UI.Msgbox("No ID was selected!")
+Function.Intrinsic.Control.Else
+   Function.Intrinsic.String.Split(Variable.Local.sRet,"*!*",Variable.Local.sRet)
+   gui.F_Update_Schedule.txtFrom.Text(v.Local.sRet(0))
+Function.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+    F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+    F.Intrinsic.UI.Msgbox(V.Local.sError)
+    f.Intrinsic.Control.CallSub(F_Update_Schedule_Unload)
+F.Intrinsic.Control.EndTry
+Program.Sub.btnFromBrowser_Click.End
+
+Program.Sub.btnToBrowser_Click.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare(String, "")
+
+Variable.Local.sRet.Declare(string)
+Variable.Local.sTemp.Declare(string)
+Variable.Local.sTitles.Declare(string)
+Variable.Local.iWidths.Declare(long)
+V.Local.sTitles.Set("ID")
+v.Local.iWidths.Set("20")
+f.Intrinsic.UI.Browser("To Schedule","con","Select ID from V_SCHED_GROUP",V.Local.sTitles,V.Local.iWidths,V.Local.sRet)
+Function.Intrinsic.Control.If(Variable.Local.sRet,"=","***CANCEL***")
+   Function.Intrinsic.UI.Msgbox("No ID was selected!")
+Function.Intrinsic.Control.Else
+   Function.Intrinsic.String.Split(Variable.Local.sRet,"*!*",Variable.Local.sRet)
+   gui.F_Update_Schedule.txtTo.Text(v.Local.sRet(0))
+Function.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+    F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+    F.Intrinsic.UI.Msgbox(V.Local.sError)
+    f.Intrinsic.Control.CallSub(F_Update_Schedule_Unload)
+F.Intrinsic.Control.EndTry
+Program.Sub.btnToBrowser_Click.End
